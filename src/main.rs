@@ -32,7 +32,7 @@ fn main() -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS imageData (
             id INTEGER PRIMARY KEY,
-            idx TEXT NOT NULL,
+            idx INTEGER NOT NULL,
             img_path TEXT NOT NULL,
             size INTEGER NOT NULL,
             img_hash TEXT NOT NULL
@@ -44,15 +44,21 @@ fn main() -> Result<()> {
     for entry in WalkDir::new(image_path).into_iter().filter_map(|e| e.ok()) {
         if entry.path().extension().and_then(|s| s.to_str()) == Some("jpg") {
             let img_path = entry.path().to_str().unwrap().to_string();
-            let img = image::open(&img_path).unwrap();
-            let size = img.dimensions().0 * img.dimensions().1;
-            let img_hash = calculate_hash(&img_path);
-
-            conn.execute(
-                "INSERT INTO imageData (idx, img_path, size, img_hash) VALUES (?1, ?2, ?3, ?4)",
-                params![idx, img_path, size, img_hash],
-            )?;
-            idx += 1;
+            match image::open(&img_path) {
+                Ok(img) => {
+                    let size = img.dimensions().0 * img.dimensions().1;
+                    let img_hash = calculate_hash(&img_path);
+                    println!("{}", idx);
+                    conn.execute(
+                        "INSERT INTO imageData (idx, img_path, size, img_hash) VALUES (?1, ?2, ?3, ?4)",
+                        params![idx, img_path, size, img_hash],
+                    )?;
+                    idx += 1;
+                },
+                Err(e) => {
+                    eprintln!("Failed to open image {}: {:?}", img_path, e);
+                }
+            }
         }
     }
 
