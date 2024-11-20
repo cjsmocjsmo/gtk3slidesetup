@@ -6,6 +6,7 @@ use std::fs::File;
 use std::path::Path;
 use std::hash::{Hasher, Hash};
 use std::collections::hash_map::DefaultHasher;
+use rayon::prelude::*;
 
 fn main() -> Result<()> {
     let matches = Command::new("Image CLI")
@@ -40,27 +41,30 @@ fn main() -> Result<()> {
         [],
     )?;
 
-    let mut idx = 1;
-    for entry in WalkDir::new(image_path).into_iter().filter_map(|e| e.ok()) {
-        if entry.path().extension().and_then(|s| s.to_str()) == Some("jpg") {
-            let img_path = entry.path().to_str().unwrap().to_string();
-            match image::open(&img_path) {
-                Ok(img) => {
-                    let size = img.dimensions().0 * img.dimensions().1;
-                    let img_hash = calculate_hash(&img_path);
-                    println!("{}", idx);
-                    conn.execute(
-                        "INSERT INTO imageData (idx, img_path, size, img_hash) VALUES (?1, ?2, ?3, ?4)",
-                        params![idx, img_path, size, img_hash],
-                    )?;
-                    idx += 1;
-                },
-                Err(e) => {
-                    eprintln!("Failed to open image {}: {:?}", img_path, e);
-                }
+    let entries: Vec<_> = WalkDir::new(image_path)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("jpg"))
+        .collect();
+
+    entries.par_iter().enumerate().for_each(|(idx, entry)| {
+        let img_path = entry.path().to_str().unwrap().to_string();
+        match image::open(&img_path) {
+            Ok(img) => {
+                let size = img.dimensions().0 * img.dimensions().1;
+                let img_hash = calculate_hash(&img_path);
+
+                let conn = Connection::open(db_path).unwrap();
+                conn.execute(
+                    "INSERT INTO imageData (idx, img_path, size, img_hash) VALUES (?1, ?2, ?3, ?4)",
+                    params![idx as i32 + 1, img_path, size, img_hash],
+                ).unwrap();
+            },
+            Err(e) => {
+                eprintln!("Failed to open image {}: {:?}", img_path, e);
             }
         }
-    }
+    });
 
     Ok(())
 }
