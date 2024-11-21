@@ -91,10 +91,10 @@ use clap::{Command, Arg};
 use walkdir::WalkDir;
 use image::GenericImageView;
 use rusqlite::{params, Connection, Result};
-use std::fs::File;
-use std::path::Path;
-use std::hash::{Hasher, Hash};
-use std::collections::hash_map::DefaultHasher;
+// use std::fs::File;
+// use std::path::Path;
+// use std::hash::{Hasher, Hash};
+// use std::collections::hash_map::DefaultHasher;
 use rayon::prelude::*;
 use std::time::Instant;
 
@@ -149,7 +149,7 @@ fn main() -> Result<()> {
 
                 let conn = Connection::open(db_path).unwrap();
                 conn.execute(
-                    "INSERT INTO imageData (idx, img_path, size, img_hash) VALUES (?1, ?2, ?3)",
+                    "INSERT INTO imageData (idx, img_path, size) VALUES (?1, ?2, ?3)",
                     params![idx as i32 + 1, img_path, size],
                 ).unwrap();
             },
