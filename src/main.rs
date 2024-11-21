@@ -11,6 +11,8 @@ use std::time::Instant;
 
 fn main() -> Result<()> {
     let start = Instant::now();
+    println!("start time  {:?}", start);
+
     let matches = Command::new("Image CLI")
         .version("1.0")
         .author("Author Name <author@example.com>")
@@ -55,6 +57,8 @@ fn main() -> Result<()> {
             Ok(img) => {
                 let size = img.dimensions().0 * img.dimensions().1;
                 let img_hash = calculate_hash(&img_path);
+
+                println!("size {}", size);
 
                 let conn = Connection::open(db_path).unwrap();
                 conn.execute(
