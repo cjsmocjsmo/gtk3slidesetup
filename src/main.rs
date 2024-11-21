@@ -7,8 +7,10 @@ use std::path::Path;
 use std::hash::{Hasher, Hash};
 use std::collections::hash_map::DefaultHasher;
 use rayon::prelude::*;
+use std::time::Instant;
 
 fn main() -> Result<()> {
+    let start = Instant::now();
     let matches = Command::new("Image CLI")
         .version("1.0")
         .author("Author Name <author@example.com>")
@@ -66,6 +68,9 @@ fn main() -> Result<()> {
         }
     });
 
+    let duration = start.elapsed();
+    println!("Time elapsed: {:?}", duration);
+    
     Ok(())
 }
 
