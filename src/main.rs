@@ -89,7 +89,7 @@
 
 use clap::{Command, Arg};
 use walkdir::WalkDir;
-use image::GenericImageView;
+// use image::GenericImageView;
 use rusqlite::{params, Connection, Result};
 // use std::fs::File;
 // use std::path::Path;
@@ -142,8 +142,9 @@ fn main() -> Result<()> {
     entries.par_iter().enumerate().for_each(|(idx, entry)| {
         let img_path = entry.path().to_str().unwrap().to_string();
         match image::open(&img_path) {
-            Ok(img) => {
-                let size = img.dimensions().0 * img.dimensions().1;
+            Ok(_) => {
+                let metadata = std::fs::metadata(&img_path).unwrap();
+                let size = metadata.len();
 
                 println!("size {}", size);
 
