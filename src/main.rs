@@ -141,8 +141,8 @@ fn main() -> Result<()> {
 
     entries.par_iter().enumerate().for_each(|(idx, entry)| {
         let img_path = entry.path().to_str().unwrap().to_string();
-        match image::open(&img_path) {
-            Ok(_) => {
+        // match image::open(&img_path) {
+        //     Ok(_) => {
                 let metadata = std::fs::metadata(&img_path).unwrap();
                 let size = metadata.len();
 
@@ -153,11 +153,11 @@ fn main() -> Result<()> {
                     "INSERT INTO imageData (idx, img_path, size) VALUES (?1, ?2, ?3)",
                     params![idx as i32 + 1, img_path, size],
                 ).unwrap();
-            },
-            Err(e) => {
-                eprintln!("Failed to open image {}: {:?}", img_path, e);
-            }
-        }
+            // },
+            // Err(e) => {
+            //     eprintln!("Failed to open image {}: {:?}", img_path, e);
+            // }
+        // }
     });
 
     let duration = start.elapsed();
