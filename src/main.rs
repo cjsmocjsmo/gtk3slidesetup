@@ -156,6 +156,12 @@ fn main() -> Result<()> {
             },
             Err(e) => {
                 eprintln!("Failed to open image {}: {:?}", img_path, e);
+                let bad_pics_dir = "/home/whitepi/Pictures/BadPics/";
+                std::fs::create_dir_all(bad_pics_dir).unwrap();
+                let dest_path = std::path::Path::new(bad_pics_dir).join(entry.file_name());
+                if let Err(e) = std::fs::rename(&img_path, &dest_path) {
+                    eprintln!("Failed to move bad image {}: {:?}", img_path, e);
+                }
             }
         }
     });
