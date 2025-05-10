@@ -163,21 +163,23 @@ fn main() -> Result<()> {
                 let mut results = results.lock().unwrap();
                 results.push((idx as i32 + 1, img_path, size, orientation, b64));
             }
-            let bad_pics_dir = "/home/whitepi/Pictures/BadPics/";
-            std::fs::create_dir_all(bad_pics_dir).unwrap();
-            let dest_path = std::path::Path::new(bad_pics_dir).join(entry.file_name());
-            println!("Moving bad image {}\n to\n {:?}", img_path, dest_path);
+            Err(e) => {
+                let bad_pics_dir = "/home/whitepi/Pictures/BadPics/";
+                std::fs::create_dir_all(bad_pics_dir).unwrap();
+                let dest_path = std::path::Path::new(bad_pics_dir).join(entry.file_name());
+                println!("Moving bad image {}\n to\n {:?}", img_path, dest_path);
 
-            if let Err(e) = std::fs::rename(&img_path, &dest_path) {
-                if e.kind() == std::io::ErrorKind::CrossesDevices {
-                    // Handle cross-device error by copying and deleting
-                    if let Err(copy_err) = std::fs::copy(&img_path, &dest_path) {
-                        eprintln!("Failed to copy bad image {}: {:?}", img_path, copy_err);
-                    } else if let Err(remove_err) = std::fs::remove_file(&img_path) {
-                        eprintln!("Failed to remove original bad image {}: {:?}", img_path, remove_err);
+                if let Err(e) = std::fs::rename(&img_path, &dest_path) {
+                    if e.kind() == std::io::ErrorKind::CrossesDevices {
+                        // Handle cross-device error by copying and deleting
+                        if let Err(copy_err) = std::fs::copy(&img_path, &dest_path) {
+                            eprintln!("Failed to copy bad image {}: {:?}", img_path, copy_err);
+                        } else if let Err(remove_err) = std::fs::remove_file(&img_path) {
+                            eprintln!("Failed to remove original bad image {}: {:?}", img_path, remove_err);
+                        }
+                    } else {
+                        eprintln!("Failed to move bad image {}: {:?}", img_path, e);
                     }
-                } else {
-                    eprintln!("Failed to move bad image {}: {:?}", img_path, e);
                 }
             }
         }
