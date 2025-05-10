@@ -130,7 +130,7 @@ fn main() -> Result<()> {
     let image_path = matches.get_one::<String>("image_path").unwrap();
     let db_path = matches.get_one::<String>("db_path").unwrap();
 
-    let conn = Connection::open(db_path)?;
+    let mut conn = Connection::open(db_path)?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS imageData (
             id INTEGER PRIMARY KEY,
