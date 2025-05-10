@@ -189,7 +189,7 @@ fn main() -> Result<()> {
 
     let duration = start.elapsed();
 
-    Ok((println!("Time elapsed: {:?}", duration)))
+    Ok(println!("Time elapsed: {:?}", duration))
 
     
 }
