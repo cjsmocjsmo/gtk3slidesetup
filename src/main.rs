@@ -5,6 +5,7 @@ use walkdir::WalkDir;
 use rusqlite::{params, Connection, Result};
 use rayon::prelude::*;
 use std::time::Instant;
+use base64::{engine::general_purpose, Engine as _};
 
 fn main() -> Result<()> {
     let start = Instant::now();
@@ -56,7 +57,7 @@ fn main() -> Result<()> {
                 let metadata = std::fs::metadata(&img_path).unwrap();
                 let size = metadata.len();
                 let orientation = get_orientation(&img_path);
-                let b64 = base64::encode(&std::fs::read(&img_path).unwrap());
+                let b64 = general_purpose::STANDARD.encode(&std::fs::read(&img_path).unwrap());
 
                 let conn = Connection::open(db_path).unwrap();
                 conn.execute(
