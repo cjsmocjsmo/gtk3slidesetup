@@ -147,34 +147,34 @@ fn main() -> Result<()> {
     let results = Mutex::new(Vec::new());
 
     WalkDir::new(image_path)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("jpg"))
-        .par_bridge() // Parallelize the iterator
-        .enumerate()
-        .for_each(|(idx, entry)| {
-            let img_path = entry.path().to_str().unwrap().to_string();
-            match image::open(&img_path) {
-                Ok(img) => {
-                    let size = std::fs::metadata(&img_path).unwrap().len();
-                    let orientation = get_orientation(&img);
-                    let b64 = general_purpose::STANDARD.encode(&std::fs::read(&img_path).unwrap());
+    .into_iter()
+    .filter_map(|e| e.ok())
+    .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("jpg"))
+    .enumerate() // Apply enumerate before par_bridge
+    .par_bridge() // Parallelize the iterator
+    .for_each(|(idx, entry)| {
+        let img_path = entry.path().to_str().unwrap().to_string();
+        match image::open(&img_path) {
+            Ok(img) => {
+                let size = std::fs::metadata(&img_path).unwrap().len();
+                let orientation = get_orientation(&img);
+                let b64 = general_purpose::STANDARD.encode(&std::fs::read(&img_path).unwrap());
 
-                    let mut results = results.lock().unwrap();
-                    results.push((idx as i32 + 1, img_path, size, orientation, b64));
-                }
-                Err(e) => {
-                    eprintln!("Failed to open image {}: {:?}", img_path, e);
-                    let bad_pics_dir = "/media/piir/PiTB/BadPics/";
-                    std::fs::create_dir_all(bad_pics_dir).unwrap();
-                    let dest_path = std::path::Path::new(bad_pics_dir).join(entry.file_name());
-                    println!("Moving bad image {}\n to\n {:?}", img_path, dest_path);
-                    if let Err(e) = std::fs::rename(&img_path, &dest_path) {
-                        eprintln!("Failed to move bad image {}: {:?}", img_path, e);
-                    }
+                let mut results = results.lock().unwrap();
+                results.push((idx as i32 + 1, img_path, size, orientation, b64));
+            }
+            Err(e) => {
+                eprintln!("Failed to open image {}: {:?}", img_path, e);
+                let bad_pics_dir = "/media/piir/PiTB/BadPics/";
+                std::fs::create_dir_all(bad_pics_dir).unwrap();
+                let dest_path = std::path::Path::new(bad_pics_dir).join(entry.file_name());
+                println!("Moving bad image {}\n to\n {:?}", img_path, dest_path);
+                if let Err(e) = std::fs::rename(&img_path, &dest_path) {
+                    eprintln!("Failed to move bad image {}: {:?}", img_path, e);
                 }
             }
-        });
+        }
+    });
 
     // Batch insert into the database
     let results = results.into_inner().unwrap();
