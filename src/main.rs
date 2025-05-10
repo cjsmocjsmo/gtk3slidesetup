@@ -1,5 +1,5 @@
 
-
+use image::GenericImageView;
 use clap::{Command, Arg};
 use walkdir::WalkDir;
 use rusqlite::{params, Connection, Result};
