@@ -187,12 +187,12 @@ fn main() -> Result<()> {
     }
     tx.commit()?;
 
+    let duration = start.elapsed();
     
 
-    Ok(())
+    Ok((println!("Time elapsed: {:?}", duration);))
+
     
-    let duration = start.elapsed();
-    println!("Time elapsed: {:?}", duration);
 }
 
 fn get_orientation(img: &image::DynamicImage) -> String {
