@@ -187,15 +187,17 @@ fn main() -> Result<()> {
     }
     tx.commit()?;
 
-    let duration = start.elapsed();
-    println!("Time elapsed: {:?}", duration);
+    
 
     Ok(())
+    
+    let duration = start.elapsed();
+    println!("Time elapsed: {:?}", duration);
 }
 
 fn get_orientation(img: &image::DynamicImage) -> String {
     let (width, height) = img.dimensions();
-    println!("width {} height {}", width, height);
+    // println!("width {} height {}", width, height);
 
     if width > height {
         "landscape".to_string()
