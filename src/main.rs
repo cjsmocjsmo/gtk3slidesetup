@@ -188,7 +188,6 @@ fn main() -> Result<()> {
     tx.commit()?;
 
     let duration = start.elapsed();
-    
 
     Ok((println!("Time elapsed: {:?}", duration)))
 
